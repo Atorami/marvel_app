@@ -23,15 +23,9 @@ class MarvelService {
     }
 
     _transformCharacter = (char) => {
-        if (char.description.length > 20){
-            char.description = char.description.slice(0, 200) + '...'
-            
-        }else {
-            char.description = 'Description not found'
-        }
         return {
             name: char.name,
-            description: char.description,
+            description: char.description ? `${char.description.slice(0, 200)}...` : 'Description not found',
             thumbnail: char.thumbnail.path + '.' + char.thumbnail.extension,
             homepage: char.urls[0].url,
             wiki: char.urls[1].url
