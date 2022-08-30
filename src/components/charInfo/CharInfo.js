@@ -1,5 +1,6 @@
 import { Component } from 'react/cjs/react.production.min';
 import MarvelService from '../../services/MarelService';
+import PropTypes from 'prop-types';
 
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
@@ -17,7 +18,7 @@ class CharInfo extends Component {
 
     marvelService = new MarvelService()
 
-    componentDidMount() {
+    componentDidMount(){
         this.updateChar()
     }
 
@@ -128,6 +129,10 @@ const View = ({char}) => {
             </ul>
         </>
     )
+}
+
+CharInfo.propTypes = {
+    charId: PropTypes.number
 }
 
 export default CharInfo;
