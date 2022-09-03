@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import MarvelService from '../../services/MarelService';
+import useMarvelService from '../../services/MarelService';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage'
 import PropTypes from 'prop-types';
@@ -10,27 +10,20 @@ import './charList.scss';
 const CharList = (props) => {
 
     const [charList, setCharList] = useState([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(false)
     const [newItemLoading, setNewItemLoading] = useState(false)
     const [offset, setOffset] = useState(210)
     const [charEnded, setCharEnded] = useState(false)
 
-    const marvelService = new MarvelService()
+    const {loading, error, getAllCharacters} = useMarvelService()
 
     useEffect(() =>{
-        onRequest()
+        onRequest(offset, true)
     }, [])
 
-    const onRequest = (offset) =>{
-        onCharListLoading()
-        marvelService.getAllCharacters(offset)
+    const onRequest = (offset, initial) =>{
+        initial ? setNewItemLoading(false) : setNewItemLoading(true)
+        getAllCharacters(offset)
             .then(onCharListLoaded)
-            .catch(onError)
-    }
-
-    const onCharListLoading = () =>{
-        setNewItemLoading(true)
     }
 
     const onCharListLoaded = (newCharList) => {
@@ -40,15 +33,9 @@ const CharList = (props) => {
         }
 
         setCharList(charList => [...charList, ...newCharList])
-        setLoading(loading => false)
-        setNewItemLoading(setNewItemLoading => false)
+        setNewItemLoading(newItemLoading => false)
         setOffset(offset => offset + 9)
-        setCharEnded(setCharEnded => ended)
-    }
-
-    const onError = () => {
-        setError(true)
-        setLoading(loading => false)
+        setCharEnded(charEnded => ended)
     }
 
     // Создается массив куда пушаться все рефы по клику, которые рендаряться в li
@@ -82,7 +69,8 @@ const CharList = (props) => {
             return (
                 <li 
                     className="char__item"
-                   ref={el => refsArr.current[i] = el}
+                    tabIndex={0}
+                    ref={el => refsArr.current[i] = el}
                     key={item.id}
                     onClick={() => {
                         props.onCharSelected(item.id)
@@ -105,14 +93,13 @@ const CharList = (props) => {
     const items = renderItems(charList);
 
     const errorMessage = error ? <ErrorMessage/> : null;
-    const spinner = loading ? <Spinner/> : null;
-    const content = !(loading || error) ? items : null;
+    const spinner = loading  && !newItemLoading ? <Spinner/> : null;
 
     return (
         <div className="char__list">
             {errorMessage}
             {spinner}
-            {content}
+            {items}
             <button className="button button__main button__long"
             disabled={newItemLoading}
             style={{'display': charEnded ? 'none' : 'block'}}

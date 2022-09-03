@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import MarvelService from '../../services/MarelService';
+import useMarvelService from '../../services/MarelService';
 import PropTypes from 'prop-types';
 
 import Spinner from '../spinner/Spinner';
@@ -11,10 +11,8 @@ import './charInfo.scss';
 const CharInfo = (props) => {
 
     const [char, setChar] = useState(null)
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState(false)
 
-    const marvelService = new MarvelService()
+    const {loading, error, getCharacter, clearError} = useMarvelService()
 
     useEffect(() =>{
         updateChar()
@@ -27,29 +25,14 @@ const CharInfo = (props) => {
             return
         }
 
-        onCharLoading()
-
-        marvelService
-            .getCharacter(charId)
-            .then(onCharLoaded)
-            .catch(onError)
+    clearError()
+    getCharacter(charId)
+        .then(onCharLoaded)
     }
 
     const onCharLoaded = (char) => {
-        setChar(char)
-        setLoading(false)
+        setChar(char)        
     }
-
-    const onCharLoading = () => {
-        setLoading(true)
-    }
-
-    const onError = () => {
-        setError(true)
-        setLoading(false)
-    }
-
-
 
     const skeleton =  char || loading || error ? null : <Skeleton></Skeleton>
     const errorMessage = error ? <ErrorMessage></ErrorMessage> : null
@@ -70,7 +53,6 @@ const CharInfo = (props) => {
 const View = ({char}) => {
     const {name, description, thumbnail, homepage, wiki, comics} = char;
 
-    console.log(char)
     let imgStyle = {'objectFit' : 'cover'};
     if (thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg'){
         imgStyle = {'objectFit' : 'contain'};
